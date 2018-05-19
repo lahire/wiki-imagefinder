@@ -3,3 +3,4 @@ json.json
 apicache*
 throttle*
 *.csv
+__pycache__
