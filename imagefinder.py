@@ -9,6 +9,7 @@
 
 import pywikibot
 import csv
+import json
 import time
 
 def getQ(page):
@@ -62,6 +63,17 @@ def isInCategory(page, categoriesToCheck=[]):
     """
     categories = filter(lambda x: x[0].title(withNamespace=False) in categoriesToCheck, page.templatesWithParams())
     return list(categories)
+
+def createJSON(dump, keys=[]):
+    elements = []
+    try:
+        with open(dump,'rt') as archivo:
+            for row in csv.reader(archivo, delimiter='|'):
+                elements.append(dict(zip(keys, row)))
+    except FileNotFoundError:
+        items = []
+    with open(dump.replace('.csv', '.json'), 'w') as json_archive:
+        json_archive.write(json.dumps(elements))
 
 def printHtml():
     """
