@@ -6,7 +6,7 @@ import pywikibot
 import time
 import csv
 from shutil import copyfile
-from os import path
+from os import path, remove
 from pywikibot import pagegenerators
 
 SITE = pywikibot.Site('es','wikipedia')
@@ -126,6 +126,9 @@ def main():
     main():
         Main loop
     """
+    ##Cleanup
+    if path.isfile('dump_images.csv'):
+        remove('dump_images.csv')
     saveOldDump()
 
     generador = pagegenerators.CategorizedPageGenerator(\
