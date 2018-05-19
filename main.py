@@ -5,15 +5,51 @@
 import pywikibot
 import time
 import csv
+from shutil import copyfile
+from os import path
 from pywikibot import pagegenerators
 
 SITE = pywikibot.Site('es','wikipedia')
-generador = pagegenerators.CategorizedPageGenerator(\
-                                                pywikibot.Category(\
-                                                pywikibot.Link(\
-            'Category:Wikipedia:Artículos con coordenadas en Wikidata')))
-#pages = [pywikibot.Page(source=SITE,title='Jara (Asunción)')]
-pages = pagegenerators.PreloadingGenerator(generador, 50)
+LIMIT = 50 #50 for no-bot users
+DUMP='dump.csv'
+#DUMP_TRUE='dump_true.csv' #Si tienen p18 TRUE
+DUMPCACHE='dump.cache'
+DELI='|'
+
+def saveOldDump(dump=DUMP):
+    """
+    saveOldDump(dump=DUMP_TRUE):
+        Guarda el dump.csv previo a la ejecución para tener una "caché"
+        y lo abre en memoria
+    """
+    if path.isfile(dump):
+        copyfile(dump,DUMPCACHE)
+        return None
+    else:
+        print('No old dump to save')
+        return None
+
+def getCacheDump(dump=DUMPCACHE):
+    """
+    getCacheDump(dump):
+        Obtiene el cache y limpia los retorno de carro
+    """
+    try:
+        with open(dump,'rt') as archivo:
+            dumpstring = archivo.readlines()
+        return sorted([item.strip() for item in dumpstring])
+    except FileNotFoundError:
+        return []
+
+def isInDump(titulo, titulos):
+    """
+    checkDump(titulo, titulos):
+        Analiza si la linea investigada existe en el dump
+        True si está, False si no
+    """
+    #print('>>>> {0} - {1}'.format(titulo, titulos))
+    #print(titulo in titulos)
+    return titulo in titulos
 
 def returnTemplates(templates):
     """
@@ -74,28 +110,52 @@ def hasWikidataImage(page):
         return QhasP(wikidataItem, 'P18')
     return None
 
-def printToCsv(line, archivo='dump.csv',separador='|'):
+def printToCsv(line, archivo=DUMP,separador=DELI):
     """
     printToCsv(archivo='dump.csv',delimeter=';',line):
-        Imprime en archivo la linea, separada por separador como csv
+    Imprime en archivo la linea, separada por separador como csv
+    Jara (Asunción)|Avenida brasilia asuncion paraguay.jpg|<URL>
     """
-    with open(archivo,'w') as csv_file:
+    with open(archivo,'a') as csv_file:
         writer = csv.writer(csv_file, delimiter=separador)
         writer.writerow(line)
     return None
 
-for p in pages:
-    lista_plantilla = returnTemplates(p.templatesWithParams())
-    if len(lista_plantilla) == 0:
-        continue
-    imagen = getPhoto(lista_plantilla)
-    if imagen == None:
-        continue
-    tieneP18 = hasWikidataImage(p)
-    if tieneP18 == False:
-        outputTocsv=[p.title(), imagen, p.full_url()]
-        printToCsv(line=outputTocsv)
-        #print('Title: {0} || Image: {1} || WikidataP18?: {2}'\
-        #    .format(p.title(), imagen, tieneP18))
-    else:
-        print ('Title: {0} - has P18'.format(p.title()))
+def main():
+    """
+    main():
+        Main loop
+    """
+    saveOldDump()
+
+    generador = pagegenerators.CategorizedPageGenerator(\
+                                                    pywikibot.Category(\
+                                                    pywikibot.Link(\
+                'Category:Wikipedia:Artículos con coordenadas en Wikidata')))
+    #for debug
+    pages = pagegenerators.PreloadingGenerator(generador, LIMIT)
+    #pages = [pywikibot.Page(source=SITE,title='Palafrugell')]
+
+    lista_cache = getCacheDump('dump_skip.csv')
+    for p in pages:
+        if isInDump(p.title(), lista_cache):
+            print('>>>> {0} in dump'.format(p.title()))
+            continue
+        else:
+            print('{0} not in dump'.format(p.title()))
+        lista_plantilla = returnTemplates(p.templatesWithParams())
+        if len(lista_plantilla) == 0:
+            continue
+        imagen = getPhoto(lista_plantilla)
+        if imagen == None:
+            continue
+        if hasWikidataImage(p) == False:
+            printToCsv(line=\
+                [p.title(), imagen, p.full_url()], archivo='dump_images.csv')
+            #print('Title: {0} || Image: {1} || WikidataP18?: {2}'\
+            #    .format(p.title(), imagen, tieneP18))
+        else:
+            printToCsv(line=[p.title()], archivo='dump_skip.csv')
+
+if __name__ == '__main__':
+    main()
