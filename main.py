@@ -5,6 +5,7 @@
 import pywikibot
 import time
 import csv
+import re
 from shutil import copyfile
 from os import path, remove
 from pywikibot import pagegenerators
@@ -137,7 +138,7 @@ def main():
                 'Category:Wikipedia:Artículos con coordenadas en Wikidata')))
     #for debug
     pages = pagegenerators.PreloadingGenerator(generador, LIMIT)
-    #pages = [pywikibot.Page(source=SITE,title='Palafrugell')]
+    #pages = [pywikibot.Page(source=SITE,title='A-138')]
 
     lista_cache = getCacheDump('dump_skip.csv')
     for p in pages:
@@ -153,6 +154,10 @@ def main():
         if imagen == None:
             continue
         if hasWikidataImage(p) == False:
+            if imagen.find('|') > -1:
+                match = re.match(r"\[{2}(Archivo|Media|File):(.[^\|]*)", imagen)
+                if match != None:
+                    imagen = match.group(2)
             printToCsv(line=\
                 [p.title(), imagen, p.full_url()], archivo='dump_images.csv')
             #print('Title: {0} || Image: {1} || WikidataP18?: {2}'\
