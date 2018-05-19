@@ -8,6 +8,7 @@ import csv
 import re
 from pywikibot import pagegenerators
 from imagefinder import *
+from os import path, remove
 
 def hasWikidataCategory(page):
     """
@@ -21,6 +22,9 @@ def hasWikidataCategory(page):
     return None
 
 def main():
+    ##Cleanup
+    if path.isfile('hasno.csv'):
+        remove('hasno.csv')
     site = pywikibot.Site('es', 'wikipedia')
     listaRevision = getCacheDump('has.csv')
     generator = pagegenerators.ReferringPageGenerator(pywikibot.Page(source=site, title='Template:Commonscat'))
@@ -30,7 +34,7 @@ def main():
             continue
         elif hasWikidataCategory(p) == False:
             print ('>>> {0} has no P373'.format(p.title()))
-            lista = list(filter(lambda x: x[0].title(withNamespace=False).find('Commonscat') > -1, p.templatesWithParams()))
+            lista = isInCategory(p, ['Commonscat', 'Commons cat', 'Categoría Commons', 'Commonscat-inline', 'Commons category', 'Commons category-inline'])
             parameters = (lista[0][1])
             if len(parameters) > 0:
                 category = parameters[0]
