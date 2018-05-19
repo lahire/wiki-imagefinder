@@ -26,6 +26,8 @@ def QhasP(item, property='P18'):
     QhasP(item):
         Devueve True si el Q tiene propiedad P. False si no.
     """
+    if 'claims' not in item.toJSON().keys():
+        return False
     return property in item.toJSON().get('claims').keys()
 
 def printToCsv(line, archivo='dump.csv',separador='|'):
@@ -50,3 +52,12 @@ def getCacheDump(dump='dump.csv'):
         return sorted([item.strip() for item in dumpstring])
     except FileNotFoundError:
         return []
+
+def isInCategory(page, categoriesToCheck=[]):
+    """
+    isCategory(page, categoriesToCheck):
+        Determina si las categorias de una página está presente en
+        las catregorias a comprobar
+    """
+    categories = filter(lambda x: x[0].title(withNamespace=False) in categoriesToCheck, page.templatesWithParams())
+    return list(categories)
