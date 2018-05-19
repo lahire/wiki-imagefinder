@@ -2,3 +2,4 @@ user-config.py
 json.json
 apicache*
 throttle*
+*.csv

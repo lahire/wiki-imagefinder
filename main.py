@@ -4,15 +4,15 @@
 
 import pywikibot
 import time
-import json
+import csv
 from pywikibot import pagegenerators
 
-SITE= pywikibot.Site('es','wikipedia')
+SITE = pywikibot.Site('es','wikipedia')
 generador = pagegenerators.CategorizedPageGenerator(\
                                                 pywikibot.Category(\
                                                 pywikibot.Link(\
             'Category:Wikipedia:Artículos con coordenadas en Wikidata')))
-#pages = [pywikibot.Page(source=SITE,title='Ruta de Illinois 21')]
+#pages = [pywikibot.Page(source=SITE,title='Jara (Asunción)')]
 pages = pagegenerators.PreloadingGenerator(generador, 50)
 
 def returnTemplates(templates):
@@ -74,24 +74,28 @@ def hasWikidataImage(page):
         return QhasP(wikidataItem, 'P18')
     return None
 
-for p in pages:
-        lista_plantilla = returnTemplates(p.templatesWithParams())
-        if len(lista_plantilla) == 0:
-            continue
-        imagen = getPhoto(lista_plantilla)
-        if imagen == None:
-            continue
-        tieneP18 = hasWikidataImage(p)
-        if tieneP18 == False:
-            print('Title: {0} || Image: {1} || WikidataP18?: {2}'\
-                .format(p.title(), imagen, tieneP18))
-        else:
-            print ('Title: {0} - has P18'.format(p.title()))
+def printToCsv(line, archivo='dump.csv',separador='|'):
+    """
+    printToCsv(archivo='dump.csv',delimeter=';',line):
+        Imprime en archivo la linea, separada por separador como csv
+    """
+    with open(archivo,'w') as csv_file:
+        writer = csv.writer(csv_file, delimiter=separador)
+        writer.writerow(line)
+    return None
 
-#templates=PAGE.raw_extracted_templates
-#templates=templates[0][1]
-#if 'image' in templates.keys():
-#    DICKEY='image'
-#else:
-#    DICKEY='imagen'
-#print('Start Process')
+for p in pages:
+    lista_plantilla = returnTemplates(p.templatesWithParams())
+    if len(lista_plantilla) == 0:
+        continue
+    imagen = getPhoto(lista_plantilla)
+    if imagen == None:
+        continue
+    tieneP18 = hasWikidataImage(p)
+    if tieneP18 == False:
+        outputTocsv=[p.title(), imagen, p.full_url()]
+        printToCsv(line=outputTocsv)
+        #print('Title: {0} || Image: {1} || WikidataP18?: {2}'\
+        #    .format(p.title(), imagen, tieneP18))
+    else:
+        print ('Title: {0} - has P18'.format(p.title()))
