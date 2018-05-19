@@ -158,6 +158,8 @@ def main():
                 match = re.match(r"\[{2}(Archivo|Media|File):(.[^\|]*)", imagen)
                 if match != None:
                     imagen = match.group(2)
+            if imagen.lower().find('falta ') > -1 or imagen.find('{{') > -1:
+                continue
             printToCsv(line=\
                 [p.title(), imagen, p.full_url()], archivo='dump_images.csv')
             #print('Title: {0} || Image: {1} || WikidataP18?: {2}'\
