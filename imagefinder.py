@@ -10,6 +10,7 @@
 import pywikibot
 import csv
 import json
+import time
 
 def getQ(page):
     """
@@ -73,3 +74,34 @@ def createJSON(dump, keys=[]):
         items = []
     with open(dump.replace('.csv', '.json'), 'w') as json_archive:
         json_archive.write(json.dumps(elements))
+
+def printHtml():
+    """
+    printHTML():
+        Imprime el HTML para mostrar al final
+    """
+    HTML="""
+    <html>
+    <title>Lahitools | ImageFinder </title>
+    <h1> ImageFinder </h1>
+    <p>Simple tool to create a csv that looks for articles with image on spanish wikipedia with no p18 on Wikidata</p>
+    <p>The csv separator is a pipe: | </p>
+    <p>The order as of this moment is: Spanish Article Title | image_name.extension | URL to es.wiki | URL to Q in Wikidata</p>
+    <p>My first tool, be gentle</p>
+
+    <a href='https://github.com/lahire/wiki-imagefinder'>Github of this silly thing</a>
+    <br/>
+    <br/>
+    <a href='output.csv'>Download csv here!</a>
+    <p> Last modified: {0}/{1}/{2} {3}:{4} UTC </p>
+    <br/>
+    :D
+    </html>
+
+    """.format(timedate.timedate.now().utcnow().month,\
+               timedate.timedate.now().utcnow().day,\
+               timedate.timedate.now().utcnow().year,\
+               timedate.timedate.now().utcnow().hour,\
+               timedate.timedate.now().utcnow().minute)
+    with open('index.html','w') as f:
+        f.write(HTML)

@@ -7,12 +7,13 @@ import time
 import csv
 import re
 from shutil import copyfile
-from os import path, remove
+from os import path, remove, chdir
 from pywikibot import pagegenerators
 from imagefinder import *
 
+CWD='/data/project/lahitools/wiki-imagefinder'
 SITE = pywikibot.Site('es','wikipedia')
-LIMIT = 100 if SITE.isBot(SITE.username()) == True else 50 #50 for no-bot users
+LIMIT = 50 #50 for no-bot users
 DUMP='dump.csv'
 #DUMP_TRUE='dump_true.csv' #Si tienen p18 TRUE
 DUMPCACHE='dump.cache'
@@ -87,6 +88,10 @@ def main():
     main():
         Main loop
     """
+    try:
+        chdir(CWD)
+    except FileNotFoundError:
+        pass
     ##Cleanup
     if path.isfile('dump_images.csv'):
         remove('dump_images.csv')
@@ -128,6 +133,7 @@ def main():
             #    .format(p.title(), imagen, tieneP18))
         else:
             printToCsv(line=[p.title()], archivo='dump_skip.csv')
+    printHtml()
 
 if __name__ == '__main__':
     main()
