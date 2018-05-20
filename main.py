@@ -10,6 +10,8 @@ from shutil import copyfile
 from os import path, remove, chdir
 from pywikibot import pagegenerators
 from imagefinder import *
+from queue import Queue
+from threading import Thread
 
 CWD='/data/project/lahitools/wiki-imagefinder'
 SITE = pywikibot.Site('es','wikipedia')
@@ -83,11 +85,48 @@ def hasWikidataImage(page):
         return QhasP(wikidataItem, 'P18')
     return None
 
+def procesador(q, i):
+    while True:
+        factoring(q.get())
+        q.task_done()
+
+def factoring(p):
+        lista_plantilla = returnTemplates(p.templatesWithParams())
+        if len(lista_plantilla) == 0:
+            return None
+        imagen = getPhoto(lista_plantilla)
+        if imagen == None:
+            return None
+        if hasWikidataImage(p) == False:
+            if imagen.find('|') > -1:
+                match = re.match(r"\[{2}(Archivo|Media|File):(.[^\|]*)",\
+                                 imagen)
+                if match != None:
+                    imagen = match.group(2)
+            if imagen.lower().find('falta ') > -1 or imagen.find('{{') > -1:
+                return None
+            printToCsv(line=\
+                [p.title(), imagen, p.full_url(), getQ(p).full_url()],\
+                 archivo='dump_images.csv')
+            #print('Title: {0} || Image: {1} || WikidataP18?: {2}'\
+            #    .format(p.title(), imagen, tieneP18))
+        else:
+            printToCsv(line=[p.title()], archivo='dump_skip.csv')
+
 def main():
     """
     main():
         Main loop
     """
+
+    num_fetch_threads = 5
+
+    cola = Queue()
+    for i in range(num_fetch_threads):
+        worker = Thread(target=procesador, args=(cola, i,))
+        worker.setDaemon(True)
+        worker.start()
+
     try:
         chdir(CWD)
     except FileNotFoundError:
@@ -107,32 +146,12 @@ def main():
 
     lista_cache = getCacheDump('dump_skip.csv')
     for p in pages:
-        if isInDump(p.title(), lista_cache):
-            print('>>>> {0} in dump'.format(p.title()))
-            continue
-        else:
-            print('{0} not in dump'.format(p.title()))
-        lista_plantilla = returnTemplates(p.templatesWithParams())
-        if len(lista_plantilla) == 0:
-            continue
-        imagen = getPhoto(lista_plantilla)
-        if imagen == None:
-            continue
-        if hasWikidataImage(p) == False:
-            if imagen.find('|') > -1:
-                match = re.match(r"\[{2}(Archivo|Media|File):(.[^\|]*)",\
-                                 imagen)
-                if match != None:
-                    imagen = match.group(2)
-            if imagen.lower().find('falta ') > -1 or imagen.find('{{') > -1:
-                continue
-            printToCsv(line=\
-                [p.title(), imagen, p.full_url(), getQ(p).full_url()],\
-                 archivo='dump_images.csv')
-            #print('Title: {0} || Image: {1} || WikidataP18?: {2}'\
-            #    .format(p.title(), imagen, tieneP18))
-        else:
-            printToCsv(line=[p.title()], archivo='dump_skip.csv')
+        if isInDump(p.title(), lista_cache) == False:
+            #print('>>>> {0} in dump'.format(p.title()))
+            #continue
+            cola.put(p)
+            #print('{0} not in dump'.format(p.title()))
+    cola.join()
     printHtml()
 
 if __name__ == '__main__':
