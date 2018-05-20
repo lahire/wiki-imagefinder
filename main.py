@@ -9,6 +9,7 @@ import re
 from shutil import copyfile
 from os import path, remove
 from pywikibot import pagegenerators
+from imagefinder import *
 
 SITE = pywikibot.Site('es','wikipedia')
 LIMIT = 50 #50 for no-bot users
@@ -29,18 +30,6 @@ def saveOldDump(dump=DUMP):
     else:
         print('No old dump to save')
         return None
-
-def getCacheDump(dump=DUMPCACHE):
-    """
-    getCacheDump(dump):
-        Obtiene el cache y limpia los retorno de carro
-    """
-    try:
-        with open(dump,'rt') as archivo:
-            dumpstring = archivo.readlines()
-        return sorted([item.strip() for item in dumpstring])
-    except FileNotFoundError:
-        return []
 
 def isInDump(titulo, titulos):
     """
@@ -82,24 +71,6 @@ def getPhoto(params):
     imagen = imagen[0].split('=', 1)[1]
     return None if len(imagen.strip()) == 0 else imagen.strip()
 
-def getQ(page):
-    """
-    getQ(page):
-        Obtiene el Q de la página. Si no tiene, devuelve None
-    """
-    try:
-        return pywikibot.ItemPage.fromPage(page)
-    except pywikibot.exceptions.NoPage:
-        print('{0} has no Q element.'.format(page))
-        return None
-
-def QhasP(item, property='P18'):
-    """
-    QhasP(item):
-        Devueve True si el Q tiene propiedad P. False si no.
-    """
-    return property in item.toJSON().get('claims').keys()
-
 def hasWikidataImage(page):
     """
     hasWikidataImage(page):
@@ -109,17 +80,6 @@ def hasWikidataImage(page):
     wikidataItem = getQ(page)
     if wikidataItem != None:
         return QhasP(wikidataItem, 'P18')
-    return None
-
-def printToCsv(line, archivo=DUMP,separador=DELI):
-    """
-    printToCsv(archivo='dump.csv',delimeter=';',line):
-    Imprime en archivo la linea, separada por separador como csv
-    Jara (Asunción)|Avenida brasilia asuncion paraguay.jpg|<URL>
-    """
-    with open(archivo,'a') as csv_file:
-        writer = csv.writer(csv_file, delimiter=separador)
-        writer.writerow(line)
     return None
 
 def main():
