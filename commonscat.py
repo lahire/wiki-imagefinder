@@ -41,6 +41,7 @@ def main():
             else:
                 category = p.title(withNamespace=False)
             printToCsv(line=[p.full_url(),getQ(p).full_url(),p.title(),category], archivo='hasno.csv')
+            createJSON('hasno.csv', ['wikipedia', 'wikidata', 'article', 'category_commons'])
         else:
             print('{0} has P373'.format(p.title()))
             printToCsv(line=[p.title()], archivo='has.csv')
