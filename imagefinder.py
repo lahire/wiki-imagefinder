@@ -23,6 +23,16 @@ def getQ(page):
         print('{0} has no Q element.'.format(page))
         return None
 
+def pageHasP(page, property):
+    """
+    pageHasP(page, property):
+        Determina si la página page tiene la propiedad P
+    """
+    wikidataItem = getQ(page)
+    if wikidataItem == None:
+        return False
+    return QhasP(wikidataItem, property)
+
 def QhasP(item, property='P18'):
     """
     QhasP(item):
@@ -57,14 +67,34 @@ def getCacheDump(dump='dump.csv'):
 
 def isInCategory(page, categoriesToCheck=[]):
     """
-    isCategory(page, categoriesToCheck):
+    isInCategory(page, categoriesToCheck):
         Determina si las categorias de una página está presente en
         las catregorias a comprobar
     """
     categories = filter(lambda x: x[0].title(withNamespace=False) in categoriesToCheck, page.templatesWithParams())
     return list(categories)
 
+def getParameter(page, templates=[], parameter=''):
+    """
+    getParameter(page, templates=[], parameter=''):
+        Obtiene un parametro desde las plantillas de búsqueda
+        En caso de no encontrar el parámetro, retorna None
+    """
+    templates = isInCategory(page, templates)
+    for template, parameters in templates:
+        for param in parameters:
+            param = param.strip()
+            if param.find(parameter+'=') > -1:
+                parametro = param.replace(parameter+'=', '').strip()
+                return None if len(parametro) == 0 else parametro
+    return None
+
 def createJSON(dump, keys=[]):
+    """
+    createJSON(dump, keys):
+        Crea un archivo json dump.json a partir de un dump.csv
+        con las cabeceras keys
+    """
     elements = []
     try:
         with open(dump,'rt') as archivo:
