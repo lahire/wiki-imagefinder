@@ -38,7 +38,7 @@ def printToCsv(line, archivo='dump.csv',separador='|'):
     Imprime en archivo la linea, separada por separador como csv
     Jara (Asunción)|Avenida brasilia asuncion paraguay.jpg|<URL>
     """
-    with open(archivo,'a') as csv_file:
+    with open(archivo,mode='a', encoding='utf-8') as csv_file:
         writer = csv.writer(csv_file, delimiter=separador)
         writer.writerow(line)
     return None
@@ -72,7 +72,7 @@ def createJSON(dump, keys=[]):
                 elements.append(dict(zip(keys, row)))
     except FileNotFoundError:
         items = []
-    with open(dump.replace('.csv', '.json'), 'w') as json_archive:
+    with open(dump.replace('.csv', '.json'), mode='w', encoding='utf-8') as json_archive:
         json_archive.write(json.dumps(elements))
 
 def printHtml():
@@ -103,5 +103,5 @@ def printHtml():
                timedate.timedate.now().utcnow().year,\
                timedate.timedate.now().utcnow().hour,\
                timedate.timedate.now().utcnow().minute)
-    with open('index.html','w') as f:
+    with open('index.html',mode='w', encoding='utf-8') as f:
         f.write(HTML)
