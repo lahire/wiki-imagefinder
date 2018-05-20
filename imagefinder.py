@@ -59,7 +59,7 @@ def getCacheDump(dump='dump.csv'):
         Obtiene el cache y limpia los retorno de carro
     """
     try:
-        with open(dump,'rt') as archivo:
+        with open(dump, mode='rt', encoding='utf-8') as archivo:
             dumpstring = archivo.readlines()
         return sorted([item.strip() for item in dumpstring])
     except FileNotFoundError:
