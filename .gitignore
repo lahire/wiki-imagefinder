@@ -4,3 +4,4 @@ apicache*
 throttle*
 *.csv
 __pycache__
+*.html
