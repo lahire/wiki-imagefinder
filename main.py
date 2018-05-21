@@ -109,10 +109,10 @@ def factoring(p):
                     imagen = match.group(2)
             if imagen.lower().find('falta ') > -1 or imagen.find('{{') > -1:
                 return None
-            if isInDump(p.title(), lista_images) == False:
-                printToCsv(line=\
-                    [p.title(), imagen, p.full_url(), getQ(p).full_url()],\
-                    archivo='dump_images.csv')
+
+            printToCsv(line=\
+                [p.title(), imagen, p.full_url(), getQ(p).full_url()],\
+                archivo='dump_images.csv')
             #print('Title: {0} || Image: {1} || WikidataP18?: {2}'\
             #    .format(p.title(), imagen, tieneP18))
         else:
@@ -155,10 +155,11 @@ def main():
 
     for p in pages:
         if isInDump(p.title(), lista_cache) == False:
+            if isInDump(p.title(), lista_images) == False:
             #print('>>>> {0} in dump'.format(p.title()))
             #continue
-            print('Working on: {0}'.format(p.title()))
-            cola.put(p)
+                print('Working on: {0}'.format(p.title()))
+                cola.put(p)
             #print('{0} not in dump'.format(p.title()))
     cola.join()
     printHtml()
