@@ -10,7 +10,7 @@
 import pywikibot
 import csv
 import json
-import time
+import datetime
 
 def getQ(page):
     """
@@ -128,10 +128,10 @@ def printHtml():
     :D
     </html>
 
-    """.format(timedate.timedate.now().utcnow().month,\
-               timedate.timedate.now().utcnow().day,\
-               timedate.timedate.now().utcnow().year,\
-               timedate.timedate.now().utcnow().hour,\
-               timedate.timedate.now().utcnow().minute)
+    """.format(datetime.datetime.now().utcnow().month,\
+               datetime.datetime.now().utcnow().day,\
+               datetime.datetime.now().utcnow().year,\
+               datetime.datetime.now().utcnow().hour,\
+               datetime.datetime.now().utcnow().minute)
     with open('index.html',mode='w', encoding='utf-8') as f:
         f.write(HTML)

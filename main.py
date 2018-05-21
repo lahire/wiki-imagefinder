@@ -16,7 +16,7 @@ from threading import Thread
 CWD='/data/project/lahitools/wiki-imagefinder'
 SITE = pywikibot.Site('es','wikipedia')
 LIMIT = 50 #50 for no-bot users
-DUMP='dump.csv'
+DUMP='dump_skip.csv'
 #DUMP_TRUE='dump_true.csv' #Si tienen p18 TRUE
 DUMPCACHE='dump.cache'
 DELI='|'
