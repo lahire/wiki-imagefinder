@@ -36,7 +36,7 @@ def saveOldDump(dump=DUMP):
 
 def isInDump(titulo, titulos):
     """
-    checkDump(titulo, titulos):
+    isInkDump(titulo, titulos):
         Analiza si la linea investigada existe en el dump
         True si está, False si no
     """
@@ -109,9 +109,10 @@ def factoring(p):
                     imagen = match.group(2)
             if imagen.lower().find('falta ') > -1 or imagen.find('{{') > -1:
                 return None
-            printToCsv(line=\
-                [p.title(), imagen, p.full_url(), getQ(p).full_url()],\
-                 archivo='dump_images.csv')
+            if isInDump(p.title(), lista_images) == False:
+                printToCsv(line=\
+                    [p.title(), imagen, p.full_url(), getQ(p).full_url()],\
+                    archivo='dump_images.csv')
             #print('Title: {0} || Image: {1} || WikidataP18?: {2}'\
             #    .format(p.title(), imagen, tieneP18))
         else:
@@ -122,7 +123,7 @@ def main():
     main():
         Main loop
     """
-
+    lista_images = getCacheDump('dump_images.csv')
     num_fetch_threads = 5
 
     cola = Queue()
@@ -137,7 +138,8 @@ def main():
         pass
     ##Cleanup
     if path.isfile('dump_images.csv'):
-        remove('dump_images.csv')
+        #remove('dump_images.csv')
+        pass
     saveOldDump()
 
     generador = pagegenerators.CategorizedPageGenerator(\
@@ -150,6 +152,7 @@ def main():
     #pages = [pywikibot.Page(source=SITE,title='Þeistareykjarbunga')]
 
     lista_cache = getCacheDump('dump_skip.csv')
+
     for p in pages:
         if isInDump(p.title(), lista_cache) == False:
             #print('>>>> {0} in dump'.format(p.title()))
