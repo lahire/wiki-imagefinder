@@ -87,14 +87,18 @@ def hasWikidataImage(page):
 
 def procesador(q, i):
     while True:
-        factoring(q.get())
+        p = q.get()
+        factoring(p)
         q.task_done()
 
 def factoring(p):
+        #print('Inside Factoring {0}'.format(p.title()))
         lista_plantilla = returnTemplates(p.templatesWithParams())
+        #print('Lista Plantilla {0}'.format(lista_plantilla))
         if len(lista_plantilla) == 0:
             return None
         imagen = getPhoto(lista_plantilla)
+        #print('Imagen ', imagen)
         if imagen == None:
             return None
         if hasWikidataImage(p) == False:
@@ -140,15 +144,17 @@ def main():
                                                     pywikibot.Category(\
                                                     pywikibot.Link(\
                 'Category:Wikipedia:Artículos con coordenadas en Wikidata')))
-    #for debug
+
     pages = pagegenerators.PreloadingGenerator(generador, LIMIT)
-    #pages = [pywikibot.Page(source=SITE,title='A-138')]
+    #for debug
+    #pages = [pywikibot.Page(source=SITE,title='Þeistareykjarbunga')]
 
     lista_cache = getCacheDump('dump_skip.csv')
     for p in pages:
         if isInDump(p.title(), lista_cache) == False:
             #print('>>>> {0} in dump'.format(p.title()))
             #continue
+            print('Working on: {0}'.format(p.title()))
             cola.put(p)
             #print('{0} not in dump'.format(p.title()))
     cola.join()
