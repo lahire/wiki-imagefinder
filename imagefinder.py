@@ -56,12 +56,14 @@ def printToCsv(line, archivo='dump.csv',separador='|'):
 def getCacheDump(dump='dump.csv'):
     """
     getCacheDump(dump):
-        Obtiene el cache y limpia los retorno de carro
+        Obtiene el elemento del cache según la especificación de CSV
     """
     try:
+        dumpstring = []
         with open(dump, mode='rt', encoding='utf-8') as archivo:
-            dumpstring = archivo.readlines()
-        return sorted([item.strip() for item in dumpstring])
+            for row in csv.reader(archivo, delimiter='|'):
+                dumpstring.append(row[0])
+        return sorted(dumpstring)
     except FileNotFoundError:
         return []
 
