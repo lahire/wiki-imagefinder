@@ -103,8 +103,8 @@ def factoring(p):
             return None
         if hasWikidataImage(p) == False:
             if imagen.find('|') > -1:
-                match = re.match(r"\[{2}(Archivo|Media|File):(.[^\|]*)",\
-                                 imagen)
+                match = re.match(r"\[{2}(Archivo|Media|File|Imagen?):(.[^\|]*)",\
+                                 imagen,flags=re.IGNORECASE)
                 if match != None:
                     imagen = match.group(2)
             if imagen.lower().find('falta ') > -1 or imagen.find('{{') > -1:
