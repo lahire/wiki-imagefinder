@@ -126,7 +126,7 @@ def main():
     lista_images = getCacheDump('dump_images.csv')
     num_fetch_threads = 5
 
-    cola = Queue()
+    cola = Queue(maxsize=1000)
     for i in range(num_fetch_threads):
         worker = Thread(target=procesador, args=(cola, i,))
         worker.setDaemon(True)
@@ -138,8 +138,7 @@ def main():
         pass
     ##Cleanup
     if path.isfile('dump_images.csv'):
-        #remove('dump_images.csv')
-        pass
+        remove('dump_images.csv')
     saveOldDump()
 
     generador = pagegenerators.CategorizedPageGenerator(\
@@ -155,11 +154,10 @@ def main():
 
     for p in pages:
         if isInDump(p.title(), lista_cache) == False:
-            if isInDump(p.title(), lista_images) == False:
             #print('>>>> {0} in dump'.format(p.title()))
             #continue
-                print('Working on: {0}'.format(p.title()))
-                cola.put(p)
+#                print('Working on: {0}'.format(p.title()))
+            cola.put(p)
             #print('{0} not in dump'.format(p.title()))
     cola.join()
     printHtml()
