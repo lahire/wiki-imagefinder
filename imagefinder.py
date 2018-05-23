@@ -91,6 +91,14 @@ def getParameter(page, templates=[], parameter=''):
                 return None if len(parametro) == 0 else parametro
     return None
 
+def getLimite(site):
+    """
+    getLimite(site):
+        Obtiene el valor limite a obtener si el usuario actual es un bot o no
+        Se deja en 200, a pesar que el límite sean 500 por un tema de red
+    """
+    return 200 if site.isBot(site.username()) else 50
+
 def createJSON(dump, keys=[]):
     """
     createJSON(dump, keys):

@@ -36,14 +36,6 @@ def saveOldDump(dump=DUMP):
         print('No old dump to save')
         return None
 
-def isInDump(titulo, titulos):
-    """
-    isInkDump(titulo, titulos):
-        Analiza si la linea investigada existe en el dump
-        True si está, False si no
-    """
-    return titulo in titulos
-
 def returnTemplates(templates):
     """
     returnTemplates(templates):
@@ -89,16 +81,6 @@ def getPhoto(params):
     else:
         # No se como procesar otras cosas, solo para es.wiki
         return None
-def hasWikidataImage(page):
-    """
-    hasWikidataImage(page):
-        Retorna si el objeto en Wikidata
-        tiene una propiedad de imagen asociada o no
-    """
-    wikidataItem = getQ(page)
-    if wikidataItem != None:
-        return QhasP(wikidataItem, 'P18')
-    return None
 
 def procesador(q, i):
     """
@@ -122,7 +104,7 @@ def factoring(p):
     imagen = getPhoto(lista_plantilla)
     if imagen == None:
         return None
-    if hasWikidataImage(p) == False:
+    if pageHasP(p,'P18') == False:
         if imagen.find('|') > -1:
             match = re.match(r"\[{2}(Archivo|Media|File|Imagen?):(.[^\|]*)",\
                              imagen,flags=re.IGNORECASE)
@@ -155,6 +137,9 @@ def main():
         chdir(CWD)
     except FileNotFoundError:
         pass
+    printToCsv(line=\
+        ['Wikipedia', 'Imagen', 'URL Wikipedia', 'URL Q wikidata'],\
+        archivo='dump_images.csv')
 
     ##Cleanup
     if path.isfile(config['FILES']['images']):
@@ -165,15 +150,14 @@ def main():
                                                     pywikibot.Category(\
                                                     pywikibot.Link(\
                 config['SITE']['cat'])))
-    LIMIT = 200 if SITE.isBot(SITE.username()) else 50
-    pages = pagegenerators.PreloadingGenerator(generador, LIMIT)
+    pages = pagegenerators.PreloadingGenerator(generador, getLimite(SITE))
     #for debug
     #pages = [pywikibot.Page(source=SITE,title='Þeistareykjarbunga')]
 
     lista_cache = getCacheDump(config['FILES']['images'])
 
     for p in pages:
-        if isInDump(p.title(), lista_cache) == False:
+        if p.title() not in lista_cache:
             cola.put(p)
     cola.join()
     printHtml()
