@@ -106,18 +106,20 @@ def factoring(p):
         return None
     if pageHasP(p,'P18') == False:
         if imagen.find('|') > -1:
+            #expresion regular para capturar si hay plantilla  de imagen o no
             match = re.match(r"\[{2}(Archivo|Media|File|Imagen?):(.[^\|]*)",\
                              imagen,flags=re.IGNORECASE)
             if match != None:
                 imagen = match.group(2)
+        #si la imagen que tiene es el placeholder "falta imagen.svg", skip
         if imagen.lower().find('falta ') > -1 or imagen.find('{{') > -1:
             return None
 
         printToCsv(line=\
             [p.title(), imagen, p.full_url(), getQ(p).full_url()],\
-            archivo='dump_images.csv')
+            archivo=config['FILES']['images'])
     else:
-        printToCsv(line=[p.title()], archivo='dump_skip.csv')
+        printToCsv(line=[p.title()], archivo=config['FILES']['skip'])
 
 def main():
     """
@@ -139,7 +141,7 @@ def main():
         pass
     printToCsv(line=\
         ['Wikipedia', 'Imagen', 'URL Wikipedia', 'URL Q wikidata'],\
-        archivo='dump_images.csv')
+        archivo=config['FILES']['images'])
 
     ##Cleanup
 
@@ -147,12 +149,16 @@ def main():
     if path.isfile(config['FILES']['images']):
         remove(config['FILES']['images'])
     saveOldDump()
+    #default cat
+    cat = config['SITE']['cat'] if config['SITE']['cat'] != '' else cat =\
+        'Category:Wikipedia:Artículos con coordenadas en Wikidata'
 
     generador = pagegenerators.CategorizedPageGenerator(\
-                                                    pywikibot.Category(\
-                                                    pywikibot.Link(\
-                'Category:Wikipedia:Artículos con coordenadas en Wikidata')))
-    pages = pagegenerators.PreloadingGenerator(generador, getLimite(SITE))
+                pywikibot.Category(\
+                pywikibot.Link(cat )))
+    pages = pagegenerators.PreloadingGenerator(\
+                generador,\
+                getLimite(SITE))
     #for debug
     #pages = [pywikibot.Page(source=SITE,title='Þeistareykjarbunga')]
 
