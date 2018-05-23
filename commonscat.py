@@ -10,17 +10,6 @@ from pywikibot import pagegenerators
 from imagefinder import *
 from os import path, remove
 
-def hasWikidataCategory(page):
-    """
-    hasWikidataImage(page):
-        Retorna si el objeto en Wikidata
-        tiene una propiedad de imagen asociada o no
-    """
-    wikidataItem = getQ(page)
-    if wikidataItem != None:
-        return QhasP(wikidataItem, 'P373')
-    return None
-
 def main():
     ##Cleanup
     if path.isfile('hasno.csv'):
@@ -32,9 +21,9 @@ def main():
         if p.namespace() not in [0, 104] or p.title() in listaRevision:
             print ('<<< {0} skipped'.format(p.title()))
             continue
-        elif hasWikidataCategory(p) == False:
+        elif pageHasP(p, 'P373') == False:
             print ('>>> {0} has no P373'.format(p.title()))
-            lista = isInCategory(p, ['Commonscat', 'Commons cat', 'Categoría Commons', 'Commonscat-inline', 'Commons category', 'Commons category-inline'])
+            lista = hasTemplate(p, ['Commonscat', 'Commons cat', 'Categoría Commons', 'Commonscat-inline', 'Commons category', 'Commons category-inline'])
             parameters = (lista[0][1])
             if len(parameters) > 0:
                 category = parameters[0]

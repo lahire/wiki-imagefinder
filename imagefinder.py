@@ -67,9 +67,9 @@ def getCacheDump(dump='dump.csv'):
     except FileNotFoundError:
         return []
 
-def isInCategory(page, categoriesToCheck=[]):
+def hasTemplate(page, categoriesToCheck=[]):
     """
-    isInCategory(page, categoriesToCheck):
+    hasTemplate(page, categoriesToCheck):
         Determina si las categorias de una página está presente en
         las catregorias a comprobar
     """
@@ -82,7 +82,7 @@ def getParameter(page, templates=[], parameter=''):
         Obtiene un parametro desde las plantillas de búsqueda
         En caso de no encontrar el parámetro, retorna None
     """
-    templates = isInCategory(page, templates)
+    templates = hasTemplate(page, templates)
     for template, parameters in templates:
         for param in parameters:
             param = param.strip()
