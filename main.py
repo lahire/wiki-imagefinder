@@ -132,8 +132,7 @@ def main():
                                                     pywikibot.Category(\
                                                     pywikibot.Link(\
                 'Category:Wikipedia:Artículos con coordenadas en Wikidata')))
-    LIMIT = 200 if SITE.isBot(SITE.username()) else 50
-    pages = pagegenerators.PreloadingGenerator(generador, LIMIT)
+    pages = pagegenerators.PreloadingGenerator(generador, getLimite(SITE))
     #for debug
     #pages = [pywikibot.Page(source=SITE,title='Þeistareykjarbunga')]
 
