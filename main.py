@@ -13,7 +13,7 @@ from imagefinder import *
 from queue import Queue
 from threading import Thread
 import configparser
-
+import codecs
 
 CWD='/data/project/lahitools/wiki-imagefinder'
 CONFIG='{0}/.config'.format(CWD)
@@ -76,7 +76,7 @@ def getPhoto(params):
             if len(imagen) == 0:
                 return None
             imagen = imagen[0].split('=', 1)[1]
-                return None if len(imagen.strip()) == 0 else imagen.strip()
+            return None if len(imagen.strip()) == 0 else imagen.strip()
 #esto suena a poco óptimo si llega a crecer
     else:
         # No se como procesar otras cosas, solo para es.wiki
@@ -125,9 +125,9 @@ def main():
         Main loop
     """
     lista_images = getCacheDump(config['FILES']['images'])
-    num_fetch_threads = config['THREAD']['threads']
+    num_fetch_threads = int(config['THREAD']['threads'])
 
-    cola = Queue(config['THREAD']['threads'])
+    cola = Queue(int(config['THREAD']['threads']))
     for i in range(num_fetch_threads):
         worker = Thread(target=procesador, args=(cola, i,))
         worker.setDaemon(True)
@@ -142,6 +142,8 @@ def main():
         archivo='dump_images.csv')
 
     ##Cleanup
+
+
     if path.isfile(config['FILES']['images']):
         remove(config['FILES']['images'])
     saveOldDump()
@@ -149,13 +151,12 @@ def main():
     generador = pagegenerators.CategorizedPageGenerator(\
                                                     pywikibot.Category(\
                                                     pywikibot.Link(\
-                config['SITE']['cat'])))
+                'Category:Wikipedia:Artículos con coordenadas en Wikidata')))
     pages = pagegenerators.PreloadingGenerator(generador, getLimite(SITE))
     #for debug
     #pages = [pywikibot.Page(source=SITE,title='Þeistareykjarbunga')]
 
-    lista_cache = getCacheDump(config['FILES']['images'])
-
+    lista_cache = getCacheDump(str(config['FILES']['skip']))
     for p in pages:
         if p.title() not in lista_cache:
             cola.put(p)
@@ -163,12 +164,12 @@ def main():
     printHtml()
 
 if __name__ == '__main__':
-    if os.path.isfile(CONFIG) == False:
+    if path.isfile(CONFIG) == False:
             print('Error: ¿existe el archivo en {0}?'.format(CONFIG))
             exit(1)
     else:
         config = configparser.ConfigParser()
-        config.read(CONFIG)
+        config.read_file(open(CONFIG, 'rt', encoding='utf-8'))
         #Declaro SITE
         SITE = pywikibot.Site(config['SITE']['language'],config['SITE']['site'])
-    main()
+        main()
