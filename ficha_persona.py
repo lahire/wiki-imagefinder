@@ -4,6 +4,7 @@
 ### que no se encuentren en Wikidata
 
 import pywikibot
+import re
 from pywikibot import pagegenerators
 from imagefinder import *
 from queue import Queue
@@ -29,9 +30,11 @@ def procesador(q, i):
 def check(page):
     twitter = getParameter(page, ['Ficha de persona'], 'twitter')
     if twitter != None:
+        twitter = re.sub(r'(https?:/{2}twitter.com/)?(@?)?(.[^?]*)', r'\3', twitter)
         if pageHasP(page, 'P2002') == False:
             print("{0} - no twitter on Wikidata".format(page.title()))
-            addWikidata(page, 'P2002', twitter.replace('@', '').replace('https://twitter.com/', ''))
+            """addWikidata(page, 'P2002', twitter)"""
+            printToCsv(line=[page.title(),twitter], archivo='ficha_twitter.csv')
         else:
             print("{0} - {1} already in Wikidata".format(page.title(), twitter))
             printToCsv(line=[page.title()], archivo='ficha_no.csv')
@@ -43,7 +46,7 @@ def main():
 
     num_fetch_threads = 5
 
-    cola = Queue()
+    cola = Queue(400)
     for i in range(num_fetch_threads):
         worker = Thread(target=procesador, args=(cola, i,))
         worker.setDaemon(True)
@@ -51,7 +54,7 @@ def main():
 
     site = pywikibot.Site('es', 'wikipedia')
     generator = pagegenerators.ReferringPageGenerator(pywikibot.Page(source=site, title='Template:Ficha de persona'), onlyTemplateInclusion=True)
-    pages = pagegenerators.PreloadingGenerator(generator, 200 if site.isBot(site.username()) else 50)
+    pages = pagegenerators.PreloadingGenerator(generator, getLimite(site))
     listaRevisados = getCacheDump(dump='ficha_no.csv')
     #pages = [pywikibot.Page(site, 'Eduardo Duhalde')]
     for page in pages:
