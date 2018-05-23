@@ -12,9 +12,12 @@ from pywikibot import pagegenerators
 from imagefinder import *
 from queue import Queue
 from threading import Thread
+import configparser
+
 
 CWD='/data/project/lahitools/wiki-imagefinder'
-SITE = pywikibot.Site('es','wikipedia')
+CONFIG='{0}/.config'.format(CWD)
+
 DUMP='dump_skip.csv'
 #DUMP_TRUE='dump_true.csv' #Si tienen p18 TRUE
 DUMPCACHE='dump.cache'
@@ -59,18 +62,33 @@ def getPhoto(params):
         Si la plantilla (params) que se le pasa tiene un parámetro de foto
         devuelve el nombre de la foto. de lo contrario, None
     """
-    imagen=list(filter(\
-    lambda x :\
-    x.find('foto=',0,5) > -1 or \
-    x.find('photo=',0,6) > -1 or \
-    x.find('image=',0,6) > -1 or \
-    x.find('imagen=',0,7) > -1\
-    ,params[0][1]))
-    if len(imagen) == 0:
+    if config['SITE']['site'] == 'wikipedia':
+        if config['SITE']['language'] == 'es':
+            imagen=list(filter(\
+            lambda x :\
+            x.find('foto=',0,5) > -1 or \
+            x.find('photo=',0,6) > -1 or \
+            x.find('image=',0,6) > -1 or \
+            x.find('imagen=',0,7) > -1\
+            ,params[0][1]))
+            if len(imagen) == 0:
+                return None
+            imagen = imagen[0].split('=', 1)[1]
+            return None if len(imagen.strip()) == 0 else imagen.strip()
+        if config['SITE']['language'] == 'en':
+            imagen=list(filter(\
+            lambda x :\
+            x.find('photo=',0,6) > -1 or \
+            x.find('image=',0,6) > -1 \
+            ,params[0][1]))
+            if len(imagen) == 0:
+                return None
+            imagen = imagen[0].split('=', 1)[1]
+                return None if len(imagen.strip()) == 0 else imagen.strip()
+#esto suena a poco óptimo si llega a crecer
+    else:
+        # No se como procesar otras cosas, solo para es.wiki
         return None
-    imagen = imagen[0].split('=', 1)[1]
-    return None if len(imagen.strip()) == 0 else imagen.strip()
-
 def hasWikidataImage(page):
     """
     hasWikidataImage(page):
@@ -124,10 +142,10 @@ def main():
     main():
         Main loop
     """
-    lista_images = getCacheDump('dump_images.csv')
-    num_fetch_threads = 5
+    lista_images = getCacheDump(config['FILES']['images'])
+    num_fetch_threads = config['THREAD']['threads']
 
-    cola = Queue(maxsize=400)
+    cola = Queue(config['THREAD']['threads'])
     for i in range(num_fetch_threads):
         worker = Thread(target=procesador, args=(cola, i,))
         worker.setDaemon(True)
@@ -139,20 +157,20 @@ def main():
         pass
 
     ##Cleanup
-    if path.isfile('dump_images.csv'):
-        remove('dump_images.csv')
+    if path.isfile(config['FILES']['images']):
+        remove(config['FILES']['images'])
     saveOldDump()
 
     generador = pagegenerators.CategorizedPageGenerator(\
                                                     pywikibot.Category(\
                                                     pywikibot.Link(\
-                'Category:Wikipedia:Artículos con coordenadas en Wikidata')))
+                config['SITE']['cat'])))
     LIMIT = 200 if SITE.isBot(SITE.username()) else 50
     pages = pagegenerators.PreloadingGenerator(generador, LIMIT)
     #for debug
     #pages = [pywikibot.Page(source=SITE,title='Þeistareykjarbunga')]
 
-    lista_cache = getCacheDump('dump_skip.csv')
+    lista_cache = getCacheDump(config['FILES']['images'])
 
     for p in pages:
         if isInDump(p.title(), lista_cache) == False:
@@ -161,4 +179,12 @@ def main():
     printHtml()
 
 if __name__ == '__main__':
+    if os.path.isfile(CONFIG) == False:
+            print('Error: ¿existe el archivo en {0}?'.format(CONFIG))
+            exit(1)
+    else:
+        config = configparser.ConfigParser()
+        config.read(CONFIG)
+        #Declaro SITE
+        SITE = pywikibot.Site(config['SITE']['language'],config['SITE']['site'])
     main()
