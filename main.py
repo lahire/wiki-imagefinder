@@ -33,14 +33,6 @@ def saveOldDump(dump=DUMP):
         print('No old dump to save')
         return None
 
-def isInDump(titulo, titulos):
-    """
-    isInkDump(titulo, titulos):
-        Analiza si la linea investigada existe en el dump
-        True si está, False si no
-    """
-    return titulo in titulos
-
 def returnTemplates(templates):
     """
     returnTemplates(templates):
@@ -71,17 +63,6 @@ def getPhoto(params):
     imagen = imagen[0].split('=', 1)[1]
     return None if len(imagen.strip()) == 0 else imagen.strip()
 
-def hasWikidataImage(page):
-    """
-    hasWikidataImage(page):
-        Retorna si el objeto en Wikidata
-        tiene una propiedad de imagen asociada o no
-    """
-    wikidataItem = getQ(page)
-    if wikidataItem != None:
-        return QhasP(wikidataItem, 'P18')
-    return None
-
 def procesador(q, i):
     """
     procesador(q,i):
@@ -104,7 +85,7 @@ def factoring(p):
     imagen = getPhoto(lista_plantilla)
     if imagen == None:
         return None
-    if hasWikidataImage(p) == False:
+    if pageHasP(p, 'P18') == False:
         if imagen.find('|') > -1:
             match = re.match(r"\[{2}(Archivo|Media|File|Imagen?):(.[^\|]*)",\
                              imagen,flags=re.IGNORECASE)
@@ -143,6 +124,10 @@ def main():
         remove('dump_images.csv')
     saveOldDump()
 
+    printToCsv(line=\
+        ['Wikipedia', 'Imagen', 'URL Wikipedia', 'URL Q wikidata'],\
+        archivo='dump_images.csv')
+
     generador = pagegenerators.CategorizedPageGenerator(\
                                                     pywikibot.Category(\
                                                     pywikibot.Link(\
@@ -155,7 +140,7 @@ def main():
     lista_cache = getCacheDump('dump_skip.csv')
 
     for p in pages:
-        if isInDump(p.title(), lista_cache) == False:
+        if p.title() not in lista_cache:
             cola.put(p)
     cola.join()
     printHtml()
