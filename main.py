@@ -125,7 +125,7 @@ def main():
         Main loop
     """
     lista_images = getCacheDump('dump_images.csv')
-    num_fetch_threads = 10
+    num_fetch_threads = 5
 
     cola = Queue(maxsize=400)
     for i in range(num_fetch_threads):
