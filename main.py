@@ -15,7 +15,6 @@ from threading import Thread
 
 CWD='/data/project/lahitools/wiki-imagefinder'
 SITE = pywikibot.Site('es','wikipedia')
-LIMIT = 50 #50 for no-bot users
 DUMP='dump_skip.csv'
 #DUMP_TRUE='dump_true.csv' #Si tienen p18 TRUE
 DUMPCACHE='dump.cache'
@@ -40,8 +39,6 @@ def isInDump(titulo, titulos):
         Analiza si la linea investigada existe en el dump
         True si está, False si no
     """
-    #print('>>>> {0} - {1}'.format(titulo, titulos))
-    #print(titulo in titulos)
     return titulo in titulos
 
 def returnTemplates(templates):
@@ -86,37 +83,41 @@ def hasWikidataImage(page):
     return None
 
 def procesador(q, i):
+    """
+    procesador(q,i):
+        Bucle infinito que corre los elementos en la cola
+    """
     while True:
         p = q.get()
         factoring(p)
         q.task_done()
 
 def factoring(p):
-        #print('Inside Factoring {0}'.format(p.title()))
-        lista_plantilla = returnTemplates(p.templatesWithParams())
-        #print('Lista Plantilla {0}'.format(lista_plantilla))
-        if len(lista_plantilla) == 0:
+    """
+    factoring(p):
+        Realiza verificaciones y escrituras en los csv usando p
+        Esta funcion se llama repetidas veces en procesador
+    """
+    lista_plantilla = returnTemplates(p.templatesWithParams())
+    if len(lista_plantilla) == 0:
+        return None
+    imagen = getPhoto(lista_plantilla)
+    if imagen == None:
+        return None
+    if hasWikidataImage(p) == False:
+        if imagen.find('|') > -1:
+            match = re.match(r"\[{2}(Archivo|Media|File|Imagen?):(.[^\|]*)",\
+                             imagen,flags=re.IGNORECASE)
+            if match != None:
+                imagen = match.group(2)
+        if imagen.lower().find('falta ') > -1 or imagen.find('{{') > -1:
             return None
-        imagen = getPhoto(lista_plantilla)
-        #print('Imagen ', imagen)
-        if imagen == None:
-            return None
-        if hasWikidataImage(p) == False:
-            if imagen.find('|') > -1:
-                match = re.match(r"\[{2}(Archivo|Media|File|Imagen?):(.[^\|]*)",\
-                                 imagen,flags=re.IGNORECASE)
-                if match != None:
-                    imagen = match.group(2)
-            if imagen.lower().find('falta ') > -1 or imagen.find('{{') > -1:
-                return None
 
-            printToCsv(line=\
-                [p.title(), imagen, p.full_url(), getQ(p).full_url()],\
-                archivo='dump_images.csv')
-            #print('Title: {0} || Image: {1} || WikidataP18?: {2}'\
-            #    .format(p.title(), imagen, tieneP18))
-        else:
-            printToCsv(line=[p.title()], archivo='dump_skip.csv')
+        printToCsv(line=\
+            [p.title(), imagen, p.full_url(), getQ(p).full_url()],\
+            archivo='dump_images.csv')
+    else:
+        printToCsv(line=[p.title()], archivo='dump_skip.csv')
 
 def main():
     """
@@ -124,9 +125,9 @@ def main():
         Main loop
     """
     lista_images = getCacheDump('dump_images.csv')
-    num_fetch_threads = 5
+    num_fetch_threads = 10
 
-    cola = Queue(maxsize=1000)
+    cola = Queue(maxsize=400)
     for i in range(num_fetch_threads):
         worker = Thread(target=procesador, args=(cola, i,))
         worker.setDaemon(True)
@@ -136,6 +137,7 @@ def main():
         chdir(CWD)
     except FileNotFoundError:
         pass
+
     ##Cleanup
     if path.isfile('dump_images.csv'):
         remove('dump_images.csv')
@@ -145,7 +147,7 @@ def main():
                                                     pywikibot.Category(\
                                                     pywikibot.Link(\
                 'Category:Wikipedia:Artículos con coordenadas en Wikidata')))
-
+    LIMIT = 200 if SITE.isBot(SITE.username()) else 50
     pages = pagegenerators.PreloadingGenerator(generador, LIMIT)
     #for debug
     #pages = [pywikibot.Page(source=SITE,title='Þeistareykjarbunga')]
@@ -154,11 +156,7 @@ def main():
 
     for p in pages:
         if isInDump(p.title(), lista_cache) == False:
-            #print('>>>> {0} in dump'.format(p.title()))
-            #continue
-#                print('Working on: {0}'.format(p.title()))
             cola.put(p)
-            #print('{0} not in dump'.format(p.title()))
     cola.join()
     printHtml()
 
