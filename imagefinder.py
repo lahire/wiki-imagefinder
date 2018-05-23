@@ -18,7 +18,7 @@ def getQ(page):
         Obtiene el Q de la página. Si no tiene, devuelve None
     """
     try:
-        return pywikibot.ItemPage.fromPage(page)
+        return page.data_item()
     except pywikibot.exceptions.NoPage:
         print('{0} has no Q element.'.format(page))
         return None
