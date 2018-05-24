@@ -129,7 +129,7 @@ def main():
     lista_images = getCacheDump(config['FILES']['images'])
     num_fetch_threads = int(config['THREAD']['threads'])
 
-    cola = Queue(int(config['THREAD']['threads']))
+    cola = Queue(maxsize=int(config['THREAD']['threads']))
     for i in range(num_fetch_threads):
         worker = Thread(target=procesador, args=(cola, i,))
         worker.setDaemon(True)
@@ -150,7 +150,10 @@ def main():
         remove(config['FILES']['images'])
     saveOldDump()
     #default cat
-    cat = config['SITE']['cat'] if config['SITE']['cat'] != '' else cat =\
+    if config['SITE']['cat'] != '':
+         cat = config['SITE']['cat']
+    else:
+         cat =\
         'Category:Wikipedia:Artículos con coordenadas en Wikidata'
 
     generador = pagegenerators.CategorizedPageGenerator(\
