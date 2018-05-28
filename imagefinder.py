@@ -18,7 +18,7 @@ def getQ(page):
         Obtiene el Q de la página. Si no tiene, devuelve None
     """
     try:
-        return pywikibot.ItemPage.fromPage(page)
+        return page.data_item()
     except pywikibot.exceptions.NoPage:
         print('{0} has no Q element.'.format(page))
         return None
@@ -41,6 +41,14 @@ def QhasP(item, property='P18'):
     if 'claims' not in item.toJSON().keys():
         return False
     return property in item.toJSON().get('claims').keys()
+
+def getLimite(site):
+    """
+    getLimite(site):
+        Obtiene el límite de páginas que puede obtener previamente.
+        Si el usuario es bot se limita a 200, sino a 50
+    """
+    return 200 if site.isBot(site.username()) else 50
 
 def printToCsv(line, archivo='dump.csv',separador='|'):
     """
