@@ -34,6 +34,6 @@ def main():
         else:
             print('{0} has P373'.format(p.title()))
             printToCsv(line=[p.title()], archivo='has.csv')
-
+            printHtml(output='has.csv')
 if __name__ == '__main__':
     main()

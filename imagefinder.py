@@ -123,33 +123,67 @@ def createJSON(dump, keys=[]):
     with open(dump.replace('.csv', '.json'), mode='w', encoding='utf-8') as json_archive:
         json_archive.write(json.dumps(elements))
 
-def printHtml():
+def printHtml(repo='https://github.com/lahire/wiki-imagefinder',
+              output='output.csv', BODY='ImageFinder'):
     """
     printHTML():
         Imprime el HTML para mostrar al final
+        repo: the repo of the thing. Default the repo of ImageFinder
+        output: the output file. Default 'output.csv'
+        BODY=The html body. For now, only hardcoded html. Maybe in the future
+        using templates?
     """
-    HTML="""
-    <html>
-    <title>Lahitools | ImageFinder </title>
-    <h1> ImageFinder </h1>
-    <p>Simple tool to create a csv that looks for articles with image on spanish wikipedia with no p18 on Wikidata</p>
-    <p>The csv separator is a pipe: | </p>
-    <p>The order as of this moment is: Spanish Article Title | image_name.extension | URL to es.wiki | URL to Q in Wikidata</p>
-    <p>My first tool, be gentle</p>
+    if BODY=='ImageFinder':
+        page='imagefinder.html'
+        HTML="""
+        <html>
+        <title>Lahitools | ImageFinder </title>
+        <h1> ImageFinder </h1>
+        <p>Simple tool to create a csv that looks for articles with image on spanish wikipedia with no p18 on Wikidata</p>
+        <p>The csv separator is a pipe: | </p>
+        <p>The order as of this moment is: Spanish Article Title | image_name.extension | URL to es.wiki | URL to Q in Wikidata</p>
+        <p>My first tool, be gentle</p>
 
-    <a href='https://github.com/lahire/wiki-imagefinder'>Github of this silly thing</a>
-    <br/>
-    <br/>
-    <a href='output.csv'>Download csv here!</a>
-    <p> Last modified: {0}/{1}/{2} {3}:{4} UTC </p>
-    <br/>
-    :D
-    </html>
+        <a href='{5}'>Github of this silly thing</a>
+        <br/>
+        <br/>
+        <a href='{6}'>Download csv here!</a>
+        <p> Last modified: {0}/{1}/{2} {3}:{4} UTC </p>
+        <br/>
+        :D
+        </html>
 
-    """.format(datetime.datetime.now().utcnow().month,\
-               datetime.datetime.now().utcnow().day,\
-               datetime.datetime.now().utcnow().year,\
-               datetime.datetime.now().utcnow().hour,\
-               datetime.datetime.now().utcnow().minute)
-    with open('index.html',mode='w', encoding='utf-8') as f:
+        """.format(datetime.datetime.now().utcnow().month,\
+                   datetime.datetime.now().utcnow().day,\
+                   datetime.datetime.now().utcnow().year,\
+                   datetime.datetime.now().utcnow().hour,\
+                   datetime.datetime.now().utcnow().minute,\
+                   repo, output)
+    elif BODY=='CommonsCat':
+        page='commonscat.html'
+        HTML="""
+        <html>
+        <title>Lahitools | CommonsCat </title>
+        By Dennis!
+        <h1> CommonsCat </h1>
+        <p>Simple tool to create a csv that looks for commonscat articles in spanish wikipedia that does not have Wikidata elements</p>
+        <p>My first tool, be gentle</p>
+
+        <a href='{5}'>Github of this silly thing</a>
+        <br/>
+        <br/>
+        <a href='{6}'>Download csv here!</a>
+        <p> Last modified: {0}/{1}/{2} {3}:{4} UTC </p>
+        <br/>
+        :D
+        </html>
+
+        """.format(datetime.datetime.now().utcnow().month,\
+                   datetime.datetime.now().utcnow().day,\
+                   datetime.datetime.now().utcnow().year,\
+                   datetime.datetime.now().utcnow().hour,\
+                   datetime.datetime.now().utcnow().minute,\
+                   repo, output)
+
+    with open(page,mode='w', encoding='utf-8') as f:
         f.write(HTML)
