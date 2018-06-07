@@ -173,12 +173,13 @@ def main():
     printHtml()
 
 if __name__ == '__main__':
-    if path.isfile(CONFIG) == False:
-            print('Error: ¿existe el archivo en {0}?'.format(CONFIG))
-            exit(1)
+    conf_file = getConfigFile(CWD)
+    if conf_file == None:
+        print('Error: ¿existe el archivo en {0}?'.format(CONFIG))
+        exit(1)
     else:
         config = configparser.ConfigParser()
-        config.read_file(open(CONFIG, 'rt', encoding='utf-8'))
+        config.read_file(open(conf_file, 'rt', encoding='utf-8'))
         #Declaro SITE
         SITE = pywikibot.Site(config['SITE']['language'],config['SITE']['site'])
         main()
