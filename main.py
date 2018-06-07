@@ -107,10 +107,11 @@ def factoring(p):
     if pageHasP(p,'P18') == False:
         if imagen.find('|') > -1:
             #expresion regular para capturar si hay plantilla  de imagen o no
-            match = re.match(r"\[{2}(Archivo|Media|File|Imagen?):(.[^\|]*)",\
+            match = re.search(r"\[{2}(?:Archivo|Media|File|Imagen?):(.[^\|]*)\|",\
                              imagen,flags=re.IGNORECASE)
+
             if match != None:
-                imagen = match.group(2)
+                imagen = match.group(1)
         #si la imagen que tiene es el placeholder "falta imagen.svg", skip
         if imagen.lower().find('falta ') > -1 or imagen.find('{{') > -1:
             return None
@@ -144,8 +145,6 @@ def main():
         archivo=config['FILES']['images'])
 
     ##Cleanup
-
-
     if path.isfile(config['FILES']['images']):
         remove(config['FILES']['images'])
     saveOldDump()
