@@ -6,11 +6,11 @@
 ### debería andar
 ### Mantenedor: Lahi | Usuario:Lahi
 
-
 import pywikibot
 import csv
 import json
 import datetime
+from os import path, remove, chdir
 
 def getQ(page):
     """
@@ -122,6 +122,19 @@ def createJSON(dump, keys=[]):
         items = []
     with open(dump.replace('.csv', '.json'), mode='w', encoding='utf-8') as json_archive:
         json_archive.write(json.dumps(elements))
+
+def getConfigFile(cwd, file="/.config"):
+    """
+    getConfigFile(cwd, file="/.config"):
+        Obtiene el archivo de configuracion desde un directorio externo o
+        desde el directorio actual.
+        En caso de ser falso, retorna None
+    """
+    if path.isfile(cwd+file) == False:
+        if path.isfile('.'+file) == False:
+            return None
+        return '.'+file
+    return cwd+file
 
 def printHtml():
     """

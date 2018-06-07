@@ -66,7 +66,7 @@ def getPhoto(params):
             if len(imagen) == 0:
                 return None
             imagen = imagen[0].split('=', 1)[1]
-            return None if len(imagen.strip()) == 0 else imagen.strip()
+            return None if len(imagen.strip()) < 3 else imagen.strip()
         if config['SITE']['language'] == 'en':
             imagen=list(filter(\
             lambda x :\
@@ -107,10 +107,11 @@ def factoring(p):
     if pageHasP(p,'P18') == False:
         if imagen.find('|') > -1:
             #expresion regular para capturar si hay plantilla  de imagen o no
-            match = re.match(r"\[{2}(Archivo|Media|File|Imagen?):(.[^\|]*)",\
+            match = re.search(r"\[{2}(?:Archivo|Media|File|Imagen?):(.[^\|]*)\|",\
                              imagen,flags=re.IGNORECASE)
+
             if match != None:
-                imagen = match.group(2)
+                imagen = match.group(1)
         #si la imagen que tiene es el placeholder "falta imagen.svg", skip
         if imagen.lower().find('falta ') > -1 or imagen.find('{{') > -1:
             return None
@@ -144,8 +145,6 @@ def main():
         archivo=config['FILES']['images'])
 
     ##Cleanup
-
-
     if path.isfile(config['FILES']['images']):
         remove(config['FILES']['images'])
     saveOldDump()
@@ -173,12 +172,13 @@ def main():
     printHtml()
 
 if __name__ == '__main__':
-    if path.isfile(CONFIG) == False:
-            print('Error: ¿existe el archivo en {0}?'.format(CONFIG))
-            exit(1)
+    conf_file = getConfigFile(CWD)
+    if conf_file == None:
+        print('Error: ¿existe el archivo en {0}?'.format(CONFIG))
+        exit(1)
     else:
         config = configparser.ConfigParser()
-        config.read_file(open(CONFIG, 'rt', encoding='utf-8'))
+        config.read_file(open(conf_file, 'rt', encoding='utf-8'))
         #Declaro SITE
         SITE = pywikibot.Site(config['SITE']['language'],config['SITE']['site'])
         main()
