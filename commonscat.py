@@ -15,6 +15,7 @@ def main():
     if path.isfile('hasno.csv'):
         remove('hasno.csv')
     site = pywikibot.Site('es', 'wikipedia')
+    commons = pywikibot.Site('commons', 'commons')
     listaRevision = getCacheDump('has.csv')
     generator = pagegenerators.ReferringPageGenerator(pywikibot.Page(source=site, title='Template:Commonscat'))
     for p in generator:
@@ -29,8 +30,11 @@ def main():
                 category = parameters[0]
             else:
                 category = p.title(withNamespace=False)
-            printToCsv(line=[p.full_url(),getQ(p).full_url(),p.title(),category], archivo='hasno.csv')
-            createJSON('hasno.csv', ['wikipedia', 'wikidata', 'article', 'category_commons'])
+            if pywikibot.Page(source=commons, title="Category:" + category).exists():
+                printToCsv(line=[p.full_url(),getQ(p).full_url(),p.title(),category], archivo='hasno.csv')
+                createJSON('hasno.csv', ['wikipedia', 'wikidata', 'article', 'category_commons'])
+            else:
+                printToCsv(line=[p.full_url()], archivo='delete.csv')
         else:
             print('{0} has P373'.format(p.title()))
             printToCsv(line=[p.title()], archivo='has.csv')
