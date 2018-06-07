@@ -66,7 +66,7 @@ def getPhoto(params):
             if len(imagen) == 0:
                 return None
             imagen = imagen[0].split('=', 1)[1]
-            return None if len(imagen.strip()) == 0 else imagen.strip()
+            return None if len(imagen.strip()) < 3 else imagen.strip()
         if config['SITE']['language'] == 'en':
             imagen=list(filter(\
             lambda x :\
