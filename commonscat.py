@@ -28,9 +28,7 @@ def work(pages):
             printToCsv(line=[page.title()], archivo='has.csv')
 
 def write_result():
-    template = open('templates/commons.tpl').read()
-    archivo = open('commons.html', 'w')
-    archivo.write(template.format(getNow(), getGitVersion()))
+    write_file('templates/commons.tpl', 'commons.html', getNow(), getGitVersion())
 
 def main(*args):
     ##Cleanup

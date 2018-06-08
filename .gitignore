@@ -6,3 +6,4 @@ throttle*
 __pycache__
 *.html
 *cache
+*.json

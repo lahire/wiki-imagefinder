@@ -153,6 +153,22 @@ def getNow(format='%Y/%m/%d %H:%M'):
     """
     return datetime.datetime.utcnow().strftime(format)
 
+def write_file(template, output, *args):
+    """
+    write_file(template, output, *args)
+        Escribe un template en un archivo, usando las variables entregadas para el format
+    """
+    if path.isfile(template) == False:
+        print('Plantilla {0} no existe'.format(template))
+        return
+    template_file = open(template).read()
+    archivo = open(output, 'w')
+    try:
+        archivo.write(template_file.format(*args))
+    except:
+        print('No se puede escribir archivo {0}'.format(output))
+        return
+
 def printHtml():
     """
     printHTML():
