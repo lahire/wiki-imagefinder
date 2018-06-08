@@ -10,34 +10,52 @@ from pywikibot import pagegenerators
 from imagefinder import *
 from os import path, remove
 
-def main():
-    ##Cleanup
-    if path.isfile('hasno.csv'):
-        remove('hasno.csv')
-    site = pywikibot.Site('es', 'wikipedia')
-    commons = pywikibot.Site('commons', 'commons')
+def work(pages):
     listaRevision = getCacheDump('has.csv')
-    generator = pagegenerators.ReferringPageGenerator(pywikibot.Page(source=site, title='Template:Commonscat'))
-    for p in generator:
-        if p.namespace() not in [0, 104] or p.title() in listaRevision:
-            print ('<<< {0} skipped'.format(p.title()))
+
+    for page in pages:
+        if page.exists() == False:
             continue
-        elif pageHasP(p, 'P373') == False:
-            print ('>>> {0} has no P373'.format(p.title()))
-            lista = hasTemplate(p, ['Commonscat', 'Commons cat', 'Categoría Commons', 'Commonscat-inline', 'Commons category', 'Commons category-inline'])
+        if page.namespace() not in [0, 104] or page.title() in listaRevision:
+            print ('<<< {0} skipped'.format(page.title()))
+            continue
+        elif pageHasP(page, 'P373') == False:
+            print ('>>> {0} has no P373'.format(page.title()))
+            lista = hasTemplate(page, ['Commonscat', 'Commons cat', 'Categoría Commons', 'Commonscat-inline', 'Commons category', 'Commons category-inline'])
             parameters = (lista[0][1])
             if len(parameters) > 0:
                 category = parameters[0]
             else:
-                category = p.title(withNamespace=False)
-            if pywikibot.Page(source=commons, title="Category:" + category).exists():
-                printToCsv(line=[p.full_url(),getQ(p).full_url(),p.title(),category], archivo='hasno.csv')
-                createJSON('hasno.csv', ['wikipedia', 'wikidata', 'article', 'category_commons'])
-            else:
-                printToCsv(line=[p.full_url()], archivo='delete.csv')
+                category = page.title(withNamespace=False)
+            printToCsv(line=[page.full_url(),getQ(page).full_url(),page.title(),category], archivo='hasno.csv')
+            createJSON('hasno.csv', ['wikipedia', 'wikidata', 'article', 'category_commons'])
         else:
-            print('{0} has P373'.format(p.title()))
-            printToCsv(line=[p.title()], archivo='has.csv')
+            print('{0} has P373'.format(page.title()))
+            printToCsv(line=[page.title()], archivo='has.csv')
+
+def write_result():
+    template = open('templates/commons.tpl').read()
+    archivo = open('commons.html', 'w')
+    archivo.write(template.format('a', getGitVersion()))
+
+def main(*args):
+    ##Cleanup
+    site = pywikibot.Site('es', 'wikipedia')
+    local_args = pywikibot.handle_args(args)
+    page = None
+    for arg in local_args:
+        if arg.startswith('-page:'):
+            page = arg[6:]
+            pages = [pywikibot.Page(source=site, title=page)]
+    if page == None:
+        tpl = pywikibot.Page(source=site, title='Template:Commonscat')
+        pages = pagegenerators.ReferringPageGenerator(tpl)
+
+    if path.isfile('hasno.csv'):
+        remove('hasno.csv')
+
+    work(pages)
+    write_result()
 
 if __name__ == '__main__':
     main()
