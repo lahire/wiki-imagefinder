@@ -14,21 +14,15 @@ def work(pages):
     listaRevision = getCacheDump('has.csv')
 
     for page in pages:
-        if page.exists() == False:
-            continue
-        if page.namespace() not in [0, 104] or page.title() in listaRevision:
+        if page.exists() == False or page.namespace() not in [0, 104] or page.title() in listaRevision:
             print ('<<< {0} skipped'.format(page.title()))
             continue
         elif pageHasP(page, 'P373') == False:
             print ('>>> {0} has no P373'.format(page.title()))
             lista = hasTemplate(page, ['Commonscat', 'Commons cat', 'Categoría Commons', 'Commonscat-inline', 'Commons category', 'Commons category-inline'])
             parameters = (lista[0][1])
-            if len(parameters) > 0:
-                category = parameters[0]
-            else:
-                category = page.title(withNamespace=False)
+            category = category[0].replace('1=', '') if len(parameters) > 0 else page.title(withNamespace=False)
             printToCsv(line=[page.full_url(),getQ(page).full_url(),page.title(),category], archivo='hasno.csv')
-            createJSON('hasno.csv', ['wikipedia', 'wikidata', 'article', 'category_commons'])
         else:
             print('{0} has P373'.format(page.title()))
             printToCsv(line=[page.title()], archivo='has.csv')
@@ -36,7 +30,7 @@ def work(pages):
 def write_result():
     template = open('templates/commons.tpl').read()
     archivo = open('commons.html', 'w')
-    archivo.write(template.format('a', getGitVersion()))
+    archivo.write(template.format(getNow(), getGitVersion()))
 
 def main(*args):
     ##Cleanup
@@ -53,6 +47,8 @@ def main(*args):
 
     if path.isfile('hasno.csv'):
         remove('hasno.csv')
+    if path.isfile('hasno.json'):
+        remove('hasno.json')
 
     work(pages)
     write_result()
