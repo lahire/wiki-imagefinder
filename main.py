@@ -122,6 +122,11 @@ def factoring(p):
     else:
         printToCsv(line=[p.title()], archivo=config['FILES']['skip'])
 
+def write_result():
+    write_file('templates/images.tpl', 'commons.html', getNow(), getGitVersion())
+
+
+
 def main():
     """
     main():
@@ -169,7 +174,9 @@ def main():
         if p.title() not in lista_cache:
             cola.put(p)
     cola.join()
-    printHtml()
+    write_result()
+
+
 
 if __name__ == '__main__':
     conf_file = getConfigFile(CWD)
