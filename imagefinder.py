@@ -11,6 +11,8 @@ import csv
 import json
 import datetime
 from os import path, remove, chdir
+import subprocess
+
 
 def getQ(page):
     """
@@ -135,6 +137,37 @@ def getConfigFile(cwd, file="/.config"):
             return None
         return '.'+file
     return cwd+file
+
+def getGitVersion():
+    """
+    getGitVersion():
+        Obtiene la versión actual de la rama de git en el directorio de ejecución
+    """
+    return str(subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).strip(), 'utf8')
+
+def getNow(format='%Y/%m/%d %H:%M'):
+    """
+    getNow(format='%Y/%m/%d %H:%M'):
+        Obtiene la fecha en un formato determinado.
+        Más información en http://strftime.org/
+    """
+    return datetime.datetime.utcnow().strftime(format)
+
+def write_file(template, output, *args):
+    """
+    write_file(template, output, *args)
+        Escribe un template en un archivo, usando las variables entregadas para el format
+    """
+    if path.isfile(template) == False:
+        print('Plantilla {0} no existe'.format(template))
+        return
+    template_file = open(template).read()
+    archivo = open(output, 'w')
+    try:
+        archivo.write(template_file.format(*args))
+    except:
+        print('No se puede escribir archivo {0}'.format(output))
+        return
 
 def printHtml():
     """
