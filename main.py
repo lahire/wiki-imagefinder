@@ -123,7 +123,7 @@ def factoring(p):
         printToCsv(line=[p.title()], archivo=config['FILES']['skip'])
 
 def write_result():
-    write_file('templates/images.tpl', 'commons.html', getNow(), getGitVersion())
+    write_file('templates/images.tpl', 'images.html', getNow(), getGitVersion())
 
 
 
