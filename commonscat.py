@@ -21,7 +21,7 @@ def work(pages):
             print ('>>> {0} has no P373'.format(page.title()))
             lista = hasTemplate(page, ['Commonscat', 'Commons cat', 'Categoría Commons', 'Commonscat-inline', 'Commons category', 'Commons category-inline'])
             parameters = (lista[0][1])
-            category = category[0].replace('1=', '') if len(parameters) > 0 else page.title(withNamespace=False)
+            category = parameters[0].replace('1=', '') if len(parameters) > 0 else page.title(withNamespace=False)
             printToCsv(line=[page.full_url(),getQ(page).full_url(),page.title(),category], archivo='hasno.csv')
         else:
             print('{0} has P373'.format(page.title()))
