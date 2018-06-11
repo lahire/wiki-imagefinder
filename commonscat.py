@@ -14,7 +14,7 @@ def work(pages):
     listaRevision = getCacheDump('has.csv')
 
     for page in pages:
-        if page.exists() == False or page.namespace() not in [0, 104] or page.title() in listaRevision:
+        if page.exists() == False or page.namespace() not in [0, 104] or page.title() in listaRevision or getQ(page) == None:
             print ('<<< {0} skipped'.format(page.title()))
             continue
         elif pageHasP(page, 'P373') == False:
