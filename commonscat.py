@@ -14,14 +14,14 @@ def work(pages):
     listaRevision = getCacheDump('has.csv')
 
     for page in pages:
-        if page.exists() == False or page.namespace() not in [0, 104] or page.title() in listaRevision:
+        if page.exists() == False or page.namespace() not in [0, 104] or page.title() in listaRevision or getQ(page) == None:
             print ('<<< {0} skipped'.format(page.title()))
             continue
         elif pageHasP(page, 'P373') == False:
             print ('>>> {0} has no P373'.format(page.title()))
             lista = hasTemplate(page, ['Commonscat', 'Commons cat', 'Categoría Commons', 'Commonscat-inline', 'Commons category', 'Commons category-inline'])
             parameters = (lista[0][1])
-            category = category[0].replace('1=', '') if len(parameters) > 0 else page.title(withNamespace=False)
+            category = parameters[0].replace('1=', '') if len(parameters) > 0 else page.title(withNamespace=False)
             printToCsv(line=[page.full_url(),getQ(page).full_url(),page.title(),category], archivo='hasno.csv')
         else:
             print('{0} has P373'.format(page.title()))
